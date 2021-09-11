@@ -1,0 +1,5 @@
+# editor files
+*.sw?
+
+# build files
+rogue
