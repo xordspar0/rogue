@@ -3,6 +3,14 @@
 #include "player.h"
 #include "monsters/giant_rat.h"
 
+void print_int(int i)
+{
+	char buffer[20];
+	sprintf(buffer, "%d", i);
+	mvaddstr(0, 0, "                         ");
+	mvaddstr(0, 0, buffer);
+}
+
 void draw_room(int x, int y, int width, int height)
 {
 	mvaddstr(y, x, "+");
@@ -31,7 +39,60 @@ void draw_room(int x, int y, int width, int height)
 	}
 }
 
-int main(void) {
+void draw_hallway(int points[][2], int length)
+{
+	if(length < 2)
+	{
+		return;
+	}
+
+	int x = points[0][0];
+	int y = points[0][1];
+
+	int direction_to_y_shift[] = {0, 1, 0, -1};
+	int direction_to_x_shift[] = {1, 0, -1, 0};
+
+	char direction_to_wall[][2] = {"|", "-", "|", "-"};
+	char direction_to_ahead[][2] = {"-", "|", "-", "|"};
+	for(int j = 1; j < length; j++)
+	{
+		int a = points[j][0];
+		int b = points[j][1];
+
+		int neg = a < 0 | b < 0;
+
+		int direction = (neg << 1) + (a != 0);
+		int y_shift = direction_to_y_shift[direction];
+		int x_shift = direction_to_x_shift[direction];
+		char * wall_string = direction_to_wall[direction];
+		char * wall_ahead = direction_to_ahead[direction];
+
+		int segment_length = a + b;
+		int mask = -(segment_length < 0);
+		segment_length += mask;
+		segment_length ^= mask;
+
+		for(int i = 0; i < segment_length; i++)
+		{
+			x += y_shift;
+			y += x_shift;
+			mvaddstr(y, x, ".");
+			mvaddstr(y + y_shift, x + x_shift, wall_string);
+			mvaddstr(y - y_shift, x - x_shift, wall_string);
+			mvaddstr(y + x_shift, x + y_shift, wall_ahead);
+		}
+		if (j < length - 1)
+		{
+			mvaddstr(y + 1, x + 1, "+");
+			mvaddstr(y - 1, x + 1, "+");
+			mvaddstr(y + 1, x - 1, "+");
+			mvaddstr(y - 1, x - 1, "+");
+		}
+	}
+}
+
+int main(void)
+{
 	initscr();
 	cbreak();
 	noecho();
