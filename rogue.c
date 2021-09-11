@@ -1,5 +1,7 @@
 #include <curses.h>
 
+#include "player.h"
+
 void draw_room(int x, int y, int width, int height)
 {
 	mvaddstr(y, x, "+");
@@ -32,12 +34,20 @@ int main(void) {
 	initscr();
 	cbreak();
 	noecho();
-	clear();
+	curs_set(0);
 
-	draw_room(5, 2, 7, 5);
+	keypad(stdscr, TRUE);
 
-	mvaddstr(10, 10, "x <-- You are here");
 
-	getch();
+	struct player p = {10, 10};
+	for (int c = 0; c != 'q'; c = getch()) {
+		player_input(&p, c);
+
+		clear();
+		draw_room(5, 2, 7, 5);
+		draw_hallway((int[][2]){{8,7}, {0,5}}, 2);
+		player_draw(&p);
+	}
+
 	endwin();
 }

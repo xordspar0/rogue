@@ -1,2 +1,4 @@
-rogue: rogue.c
-	cc rogue.c -o rogue -l curses
+rogue: rogue.o player.o
+	cc $^ -o rogue -l curses
+
+player.o: player.c player.h
