@@ -1,6 +1,7 @@
 #include <curses.h>
 
 #include "player.h"
+#include "monsters/giant_rat.h"
 
 void draw_room(int x, int y, int width, int height)
 {
@@ -38,15 +39,17 @@ int main(void) {
 
 	keypad(stdscr, TRUE);
 
-
-	struct player p = {10, 10};
+	player p = {10, 10};
+	monster r = {20, 20, 'r', *giant_rat_update};
 	for (int c = 0; c != 'q'; c = getch()) {
 		player_input(&p, c);
+		r.update(&r, p);
 
 		clear();
 		draw_room(5, 2, 7, 5);
-		draw_hallway((int[][2]){{8,7}, {0,5}}, 2);
+		draw_hallway((int[][2]){{8,7}, {0,10}, {10,0}, {0,-5}, {-3, 0}}, 5);
 		player_draw(&p);
+		monster_draw(&r);
 	}
 
 	endwin();

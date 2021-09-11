@@ -2,7 +2,7 @@
 
 #include "player.h"
 
-void player_input(struct player *p, int c)
+void player_input(player *p, int c)
 {
 		switch (c) {
 			case KEY_UP:
@@ -23,7 +23,7 @@ void player_input(struct player *p, int c)
 		}
 }
 
-void player_draw(struct player *p)
+void player_draw(player *p)
 {
 		mvaddstr(p->y, p->x, "@");
 }

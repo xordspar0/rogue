@@ -1,7 +1,7 @@
-struct player {
+typedef struct {
   int x;
   int y;
-};
+} player;
 
-void player_input(struct player *, int);
-void player_draw(struct player *);
+void player_input(player*, int);
+void player_draw(player*);
