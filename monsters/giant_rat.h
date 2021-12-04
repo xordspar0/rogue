@@ -1,3 +1,5 @@
+#include "../player.h"
+
 typedef struct monster {
   int x;
   int y;
