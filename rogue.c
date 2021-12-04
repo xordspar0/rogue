@@ -36,10 +36,10 @@ int main(void)
 	new_hallway(floor, (int[][2]){{8,7}, {0,10}, {10,0}, {0,-5}, {-3, 0}}, 5);
 
 	player p = {10, 5};
-	monster r = {20, 20, 'r', *giant_rat_update};
+	monster r = {27, 24, 'r', *giant_rat_update};
 	for (int c = 0; c != 'q'; c = getch()) {
 		player_input(floor, &p, c);
-		r.update(&r, p);
+		r.update(floor, &r, p);
 
 		draw_floor(floor);
 		player_draw(&p);
