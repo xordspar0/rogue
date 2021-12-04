@@ -44,8 +44,8 @@ int main(void)
 		r.update(floor, &r, p);
 
 		draw_floor(floor);
-		player_draw(&p);
 		monster_draw(&r);
+		player_draw(&p);
 	}
 
 	endwin();
