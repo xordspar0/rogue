@@ -1,4 +1,5 @@
 #include <curses.h>
+#include <stdlib.h>
 
 #include "player.h"
 #include "monsters/giant_rat.h"
@@ -11,122 +12,116 @@ void print_int(int i)
 	mvaddstr(0, 0, buffer);
 }
 
-void draw_room(int x, int y, int width, int height)
-{
-	mvaddstr(y, x, "+");
-	mvaddstr(y, x + width, "+");
-	mvaddstr(y + height, x, "+");
-	mvaddstr(y + height, x + width, "+");
-	for(int i = 1; i < width; i++)
-	{
-		mvaddstr(y, x + i, "-");
-	}
-
-	for(int j = 1; j < width; j++)
-	{
-		mvaddstr(y + height, x + j, "-");
-	}
-
-
-	for(int k = 1; k < height; k++)
-	{
-		mvaddstr(y + k, x, "|");
-		mvaddstr(y + k, x + width, "|");
-		for(int l = 1; l < width; l++)
-		{
-			mvaddstr(y + k, x + l, ".");
-		}
-	}
-}
-
-void draw_hallway(int points[][2], int length)
-{
-	if(length < 2)
-	{
-		return;
-	}
-
-	int x = points[0][0];
-	int y = points[0][1];
-
-	int direction_to_y_shift[] = {0, 1, 0, -1};
-	int direction_to_x_shift[] = {1, 0, -1, 0};
-
-	char direction_to_wall[][2] = {"|", "-", "|", "-"};
-	char direction_to_ahead[][2] = {"-", "|", "-", "|"};
-	for(int j = 1; j < length; j++)
-	{
-		int a = points[j][0];
-		int b = points[j][1];
-
-		int neg = a < 0 | b < 0;
-
-		int direction = (neg << 1) + (a != 0);
-		int y_shift = direction_to_y_shift[direction];
-		int x_shift = direction_to_x_shift[direction];
-		char * wall_string = direction_to_wall[direction];
-		char * wall_ahead = direction_to_ahead[direction];
-
-		int segment_length = a + b;
-		int mask = -(segment_length < 0);
-		segment_length += mask;
-		segment_length ^= mask;
-
-		for(int i = 0; i < segment_length; i++)
-		{
-			x += y_shift;
-			y += x_shift;
-			mvaddstr(y, x, ".");
-			mvaddstr(y + y_shift, x + x_shift, wall_string);
-			mvaddstr(y - y_shift, x - x_shift, wall_string);
-			mvaddstr(y + x_shift, x + y_shift, wall_ahead);
-		}
-		if (j < length - 1)
-		{
-			mvaddstr(y + 1, x + 1, "+");
-			mvaddstr(y - 1, x + 1, "+");
-			mvaddstr(y + 1, x - 1, "+");
-			mvaddstr(y - 1, x - 1, "+");
-		}
-	}
-}
-
 typedef struct Floor{
 	int height;
 	int width;
 	char * array;
 } Floor;
 
-char get_floor_element(Floor floor, int x, int y)
+typedef enum wall_component{
+	wall_ept = 0,
+	wall_ver,
+	wall_hor,
+	wall_inc,
+	wall_ouc,
+	wall_flr,
+} wall_component;
+
+char wall_symbol[] = {
+	' ',
+	'|',
+	'-',
+	'+',
+	'+',
+	'.',
+	'?',
+};
+
+wall_component get_floor_element(Floor floor, int x, int y)
 {
 	return floor.array[x * floor.height + y];
 }
 
-void set_floor_element(Floor floor, int x, int y, char c)
+void set_floor_element(Floor floor, int x, int y, wall_component c)
 {
 	floor.array[x * floor.height + y] = c;
+}
+
+void update_wall(Floor floor, int x, int y, wall_component wall_component)
+{
+	char prev = get_floor_element(floor, x, y);
+	if (prev > wall_ouc) return;
+	if ( (prev == wall_ouc) | (prev == wall_ept)) {
+		set_floor_element(floor, x, y, wall_component);
+	}
+	else {
+		if (wall_component == wall_ouc) return;
+		set_floor_element(floor, x, y, prev | wall_component);
+	}
 }
 
 void clear_floor(Floor floor)
 {
 	for (int x = 0; x < floor.width; x++) {
 		for (int y = 0; y < floor.height; y++) {
-			//floor.array[x][y] = ' ';
-			//char_array[x*w + y]
-			//char_array[x + y]
-			set_floor_element(floor, x, y, ' ');
-			//floor.array[x * floor.height + y] = ' ';
+			set_floor_element(floor, x, y, wall_ept);
 		}
 	}
 }
 
-void draw_background(Floor floor) {
+void draw_floor(Floor floor) {
 	for (int x = 0; x < floor.width; x++) {
 		for (int y = 0; y < floor.height; y++) {
-			//mvaddch(y, x, floor.array[x][y]);
-			mvaddch(y, x, get_floor_element(floor, x, y));
-			//mvaddch(y, x, ((char[floor.width][floor.height])floor.array)[x][y]);
+			mvaddch(y, x, wall_symbol[get_floor_element(floor, x, y)]);
 		}
+	}
+}
+
+void new_room(Floor floor, int x, int y, int width, int height)
+{
+	update_wall(floor, x - 1, y - 1, wall_ouc);
+	update_wall(floor, x + width, y - 1, wall_ouc);
+	update_wall(floor, x - 1, y + height, wall_ouc);
+	update_wall(floor, x + width, y + height, wall_ouc);
+	for(int i = 0; i < width; i++)
+	{
+		update_wall(floor, x + i, y - 1, wall_hor);
+		update_wall(floor, x + i, y + height, wall_hor);
+	}
+
+
+	 for (int k = 0; k < height; k++) {
+	 	for (int l = 0; l < width; l++) {
+			set_floor_element(floor, l + x, k + y, wall_flr);
+
+		}
+		update_wall(floor, x - 1, y + k, wall_ver);
+		update_wall(floor, x + width, y + k, wall_ver);
+	}
+}
+
+int min(int a, int b)
+{
+	return a < b ? a : b;
+}
+
+int max(int a, int b)
+{
+	return a > b ? a : b;
+}
+
+void new_hallway(Floor floor, int points[][2], int length)
+{
+	int start[2] = {points[0][0], points[0][1]};
+	for (int i = 1; i < length; i++) {
+		int end[2] = {start[0] + points[i][0], start[1] + points[i][1]};
+		new_room(floor,
+			min(start[0],end[0]),
+			min(start[1],end[1]),
+			abs(points[i][0])+1,
+			abs(points[i][1])+1);
+		start[0] = end[0];
+		start[1] = end[1];
 	}
 }
 
@@ -149,16 +144,17 @@ int main(void)
 	char floor_background_array[width][height];
 	floor.array = (char *) floor_background_array;
 	clear_floor(floor);
+	new_room(floor, 5, 2, 7, 5);
+	new_room(floor, 25, 22, 7, 5);
+	new_hallway(floor, (int[][2]){{8,7}, {0,10}, {10,0}, {0,-5}, {-3, 0}}, 5);
 
-	player p = {10, 10};
+	player p = {10, 5};
 	monster r = {20, 20, 'r', *giant_rat_update};
 	for (int c = 0; c != 'q'; c = getch()) {
 		player_input(&p, c);
 		r.update(&r, p);
 
-		draw_background(floor);
-		draw_room(5, 2, 7, 5);
-		draw_hallway((int[][2]){{8,7}, {0,10}, {10,0}, {0,-5}, {-3, 0}}, 5);
+		draw_floor(floor);
 		player_draw(&p);
 		monster_draw(&r);
 	}

@@ -1,5 +1,7 @@
+CFLAGS = -Wall -g -pedantic
+
 rogue: rogue.o player.o monsters/giant_rat.o
-	cc $^ -o rogue -l curses
+	cc $(CFLAGS) $^ -o rogue -l curses
 
 player.o: player.c player.h
 
