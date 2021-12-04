@@ -91,6 +91,45 @@ void draw_hallway(int points[][2], int length)
 	}
 }
 
+typedef struct Floor{
+	int height;
+	int width;
+	char * array;
+} Floor;
+
+char get_floor_element(Floor floor, int x, int y)
+{
+	return floor.array[x * floor.height + y];
+}
+
+void set_floor_element(Floor floor, int x, int y, char c)
+{
+	floor.array[x * floor.height + y] = c;
+}
+
+void clear_floor(Floor floor)
+{
+	for (int x = 0; x < floor.width; x++) {
+		for (int y = 0; y < floor.height; y++) {
+			//floor.array[x][y] = ' ';
+			//char_array[x*w + y]
+			//char_array[x + y]
+			set_floor_element(floor, x, y, ' ');
+			//floor.array[x * floor.height + y] = ' ';
+		}
+	}
+}
+
+void draw_background(Floor floor) {
+	for (int x = 0; x < floor.width; x++) {
+		for (int y = 0; y < floor.height; y++) {
+			//mvaddch(y, x, floor.array[x][y]);
+			mvaddch(y, x, get_floor_element(floor, x, y));
+			//mvaddch(y, x, ((char[floor.width][floor.height])floor.array)[x][y]);
+		}
+	}
+}
+
 int main(void)
 {
 	initscr();
@@ -100,13 +139,24 @@ int main(void)
 
 	keypad(stdscr, TRUE);
 
+	int height, width = 0;
+	getmaxyx(stdscr, height, width);
+
+	Floor floor;
+	floor.height = height;
+	floor.width = width;
+
+	char floor_background_array[width][height];
+	floor.array = (char *) floor_background_array;
+	clear_floor(floor);
+
 	player p = {10, 10};
 	monster r = {20, 20, 'r', *giant_rat_update};
 	for (int c = 0; c != 'q'; c = getch()) {
 		player_input(&p, c);
 		r.update(&r, p);
 
-		clear();
+		draw_background(floor);
 		draw_room(5, 2, 7, 5);
 		draw_hallway((int[][2]){{8,7}, {0,10}, {10,0}, {0,-5}, {-3, 0}}, 5);
 		player_draw(&p);
