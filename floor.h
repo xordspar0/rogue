@@ -1,3 +1,5 @@
+#pragma once
+
 typedef struct Floor{
 	int height;
 	int width;

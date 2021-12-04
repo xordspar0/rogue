@@ -2,23 +2,31 @@
 
 #include "player.h"
 
-void player_input(player *p, int c)
+void player_input(Floor floor, player *p, int c)
 {
 		switch (c) {
 			case KEY_UP:
-			p->y -= 1;
+				if(floor_walkable(floor, p->x, p->y - 1)){
+					p->y -= 1;
+				}
 			break;
 
 			case KEY_DOWN:
-			p->y += 1;
+				if(floor_walkable(floor, p->x, p->y + 1)){
+					p->y += 1;
+				}
 			break;
 
 			case KEY_LEFT:
-			p->x -= 1;
+				if(floor_walkable(floor, p->x - 1, p->y)){
+					p->x -= 1;
+				}
 			break;
 
 			case KEY_RIGHT:
-			p->x += 1;
+				if(floor_walkable(floor, p->x + 1, p->y)){
+					p->x += 1;
+				}
 			break;
 		}
 }

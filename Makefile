@@ -3,9 +3,10 @@ CFLAGS = -Wall -g -pedantic
 rogue: rogue.o player.o floor.o math.o monsters/giant_rat.o
 	cc $(CFLAGS) $^ -o rogue -l curses
 
+rogue.o: rogue.c floor.o player.o monsters/giant_rat.o
+floor.o: floor.c floor.h math.c math.h
 player.o: player.c player.h
 monsters/giant_rat.o: monsters/giant_rat.c monsters/giant_rat.h
-floor.o: floor.c floor.h
 
 .PHONY: clean
 clean:

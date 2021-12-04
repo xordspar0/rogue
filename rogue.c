@@ -38,7 +38,7 @@ int main(void)
 	player p = {10, 5};
 	monster r = {20, 20, 'r', *giant_rat_update};
 	for (int c = 0; c != 'q'; c = getch()) {
-		player_input(&p, c);
+		player_input(floor, &p, c);
 		r.update(&r, p);
 
 		draw_floor(floor);
