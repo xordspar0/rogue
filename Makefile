@@ -8,6 +8,10 @@ floor.o: floor.c floor.h math.c math.h
 player.o: player.c player.h
 monsters/giant_rat.o: monsters/giant_rat.c monsters/giant_rat.h
 
+.PHONY: time
+time:
+	awk '{sum += $$2} END { print sum }' time.txt
+
 .PHONY: fmt
 fmt:
 	find . -name '*.c' | xargs env VERSION_CONTROL=none indent -linux
