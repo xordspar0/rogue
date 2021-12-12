@@ -64,24 +64,24 @@ void draw_floor(Floor floor)
 	}
 }
 
-void new_room(Floor floor, int x, int y, int width, int height)
+void new_room(Floor floor, int x0, int y0, int x1, int y1)
 {
-	update_wall(floor, x - 1, y - 1, wall_ouc);
-	update_wall(floor, x + width, y - 1, wall_ouc);
-	update_wall(floor, x - 1, y + height, wall_ouc);
-	update_wall(floor, x + width, y + height, wall_ouc);
-	for (int i = 0; i < width; i++) {
-		update_wall(floor, x + i, y - 1, wall_hor);
-		update_wall(floor, x + i, y + height, wall_hor);
+	update_wall(floor, x0 - 1, y0 - 1, wall_ouc);
+	update_wall(floor, x1 + 1, y0 - 1, wall_ouc);
+	update_wall(floor, x1 + 1, y1 + 1, wall_ouc);
+	update_wall(floor, x0 - 1, y1 + 1, wall_ouc);
+	for (int i = x0; i <= x1; i++) {
+		update_wall(floor, i, y0 - 1, wall_hor);
+		update_wall(floor, i, y1 + 1, wall_hor);
 	}
 
-	for (int k = 0; k < height; k++) {
-		for (int l = 0; l < width; l++) {
-			set_floor_element(floor, l + x, k + y, wall_flr);
+	for (int k = y0; k <= y1; k++) {
+		for (int l = x0; l <= x1; l++) {
+			set_floor_element(floor, l, k, wall_flr);
 
 		}
-		update_wall(floor, x - 1, y + k, wall_ver);
-		update_wall(floor, x + width, y + k, wall_ver);
+		update_wall(floor, x0 - 1, k, wall_ver);
+		update_wall(floor, x1 + 1, k, wall_ver);
 	}
 }
 
@@ -92,7 +92,7 @@ void new_hallway(Floor floor, int points[][2], int length)
 		int end[2] =
 		    { start[0] + points[i][0], start[1] + points[i][1] };
 		new_room(floor, min(start[0], end[0]), min(start[1], end[1]),
-			 abs(points[i][0]) + 1, abs(points[i][1]) + 1);
+			 max(start[0], end[0]), max(start[0], end[0]));
 		start[0] = end[0];
 		start[1] = end[1];
 	}

@@ -44,14 +44,21 @@ int main(void)
 	int b = split(width);
 	new_room(floor,
 		1, a + 1,
-		b - 1, height - a - 2);
+		b - 1, height - 2);
 	new_room(floor,
 		b + 1, a + 1,
-		width - b - 2, height - a - 2);
+		width - 2, height - 2);
 	// new_room(floor, 25, 22, 7, 5);
-	// new_hallway(floor, (int[][2]) { {8, 7}, {0, 10}, {10, 0}, {0, -5},
-	//          {-3, 0}
-	//          }, 5);
+	/* new_hallway(
+		 floor,
+		 (int[][2]) {
+			 {6, 14},
+			 {1, 10},
+			 {10, 0},
+			 {0, -5},
+			{-3, 0}
+		},
+		5);*/
 
 	player p = { 10, 5 };
 	monster r = { 34, 3, 'r', *giant_rat_update };
