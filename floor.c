@@ -14,6 +14,54 @@ static char wall_symbol[] = {
 	'?',
 };
 
+int split(int a)
+{
+	return a / 2;
+}
+
+int split_room(Room_Layout * layout)
+{
+	int new_index = layout->generated_rooms;
+	if (new_index > 10) {
+		return 0;
+	}
+	layout->generated_rooms++;
+
+	int r0x0 = layout->rooms[0][0];
+	int r0y0 = layout->rooms[0][1];
+	int r0x1;
+	int r0y1;
+	int r1x0;
+	int r1y0;
+	int r1x1 = layout->rooms[0][2];
+	int r1y1 = layout->rooms[0][3];
+
+	if (r1x1 - r0x0 < r1y1 - r0y0) {
+		r0x1 = r1x1;
+		r0y1 = split(r0y0 + r1y1);
+		r1x0 = r0x0;
+		r1y0 = r0y1;
+		r0y1--;
+		r1y0++;
+	} else {
+		r0x1 = split(r0x0 + r1x1);
+		r0y1 = r1y1;
+		r1x0 = r0x1;
+		r1y0 = r0y0;
+		r0x1--;
+		r1x0++;
+	}
+
+	layout->rooms[0][2] = r0x1;
+	layout->rooms[0][3] = r0y1;
+	layout->rooms[new_index][0] = r1x0;
+	layout->rooms[new_index][1] = r1y0;
+	layout->rooms[new_index][2] = r1x1;
+	layout->rooms[new_index][3] = r1y1;
+
+	return 0;
+}
+
 wall_component get_floor_element(Floor floor, int x, int y)
 {
 	return floor.array[x * floor.height + y];
@@ -95,5 +143,13 @@ void new_hallway(Floor floor, int points[][2], int length)
 			 max(start[0], end[0]), max(start[0], end[0]));
 		start[0] = end[0];
 		start[1] = end[1];
+	}
+}
+
+void make_floor(Floor floor, Room_Layout layout)
+{
+	for (int i = 0; i < layout.generated_rooms; i++) {
+		int *room = layout.rooms[i];
+		new_room(floor, room[0], room[1], room[2], room[3]);
 	}
 }

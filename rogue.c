@@ -13,11 +13,6 @@ void print_int(int i)
 	mvaddstr(0, 0, buffer);
 }
 
-int split(int a)
-{
-	return a / 2;
-}
-
 int main(void)
 {
 	initscr();
@@ -33,6 +28,18 @@ int main(void)
 	int height, width = 0;
 	getmaxyx(stdscr, height, width);
 
+	Room_Layout layout;
+	layout.generated_rooms = 1;
+	layout.rooms[0][0] = 1;
+	layout.rooms[0][1] = 1;
+	layout.rooms[0][2] = width - 2;
+	layout.rooms[0][3] = height - 2;
+
+	split_room(&layout);
+	split_room(&layout);
+	split_room(&layout);
+	split_room(&layout);
+
 	Floor floor;
 	floor.height = height;
 	floor.width = width;
@@ -41,12 +48,8 @@ int main(void)
 	floor.array = (char *)floor_background_array;
 	clear_floor(floor);
 
-	int a = split(height);
-	new_room(floor, 1, 1, width - 2, a - 1);
-	int b = split(width);
-	new_room(floor, 1, a + 1, b - 1, height - 2);
-	new_room(floor, b + 1, a + 1, width - 2, height - 2);
-	// new_room(floor, 25, 22, 7, 5);
+	make_floor(floor, layout);
+
 	/* new_hallway(
 	   floor,
 	   (int[][2]) {

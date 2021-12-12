@@ -19,8 +19,7 @@ static int fill_buffer(const void *input, void *output,
 			result);
 		return paAbort;
 	}
-
-	fprintf(stderr, "Wrote %d samples into the buffer\n", result);
+	//fprintf(stderr, "Wrote %d samples into the buffer\n", result);
 	return paContinue;
 }
 
