@@ -11,23 +11,21 @@ void monster_draw(monster * m)
 
 void giant_rat_update(Floor floor, monster * m, player p)
 {
-	if (m->x + 1 < p.x) {
-		if (floor_walkable(floor, m->x + 1, m->y)) {
+	int dx = m->x - p.x;
+	int dy = m->y - p.y;
+	int d = dx * dx + dy * dy;
+	if (d > 1) {
+		if ((m->x < p.x) && floor_walkable(floor, m->x + 1, m->y)) {
 			m->x++;
-		}
-	} else if (m->x - 1 > p.x) {
-		if (floor_walkable(floor, m->x - 1, m->y)) {
+		} else if ((m->x > p.x)
+			   && floor_walkable(floor, m->x - 1, m->y)) {
 			m->x--;
-		}
-	} else {
-		if (m->y + 1 < p.y) {
-			if (floor_walkable(floor, m->x, m->y + 1)) {
-				m->y++;
-			}
-		} else if (m->y - 1 > p.y) {
-			if (floor_walkable(floor, m->x, m->y - 1)) {
-				m->y--;
-			}
+		} else if ((m->y < p.y)
+			   && floor_walkable(floor, m->x, m->y + 1)) {
+			m->y++;
+		} else if ((m->y > p.y)
+			   && floor_walkable(floor, m->x, m->y - 1)) {
+			m->y--;
 		}
 	}
 }

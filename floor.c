@@ -44,7 +44,7 @@ int split_room(Room_Layout * layout, int index)
 		r1x0 = r0x0;
 		r1y0 = r0y1;
 
-		h1x = split(r0x0 + r1x1)-2;
+		h1x = split(r0x0 + r1x1) - 2;
 		h1y = r0y1;
 		h2x = h1x + 4;
 		h2y = r0y1;

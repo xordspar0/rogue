@@ -38,12 +38,11 @@ int main(void)
 
 	split_room(&layout, 0);
 	split_room(&layout, 0);
-	split_room(&layout, 1);
-	split_room(&layout, 0);
-	split_room(&layout, 1);
 	split_room(&layout, 2);
-	split_room(&layout, 1);
-
+	split_room(&layout, 0);
+	split_room(&layout, 3);
+	split_room(&layout, 2);
+	split_room(&layout, 2);
 
 	Floor floor;
 	floor.height = height;
@@ -55,25 +54,20 @@ int main(void)
 
 	make_floor(floor, layout);
 
-	/* new_hallway(
-	   floor,
-	   (int[][2]) {
-	   {6, 14},
-	   {1, 10},
-	   {10, 0},
-	   {0, -5},
-	   {-3, 0}
-	   },
-	   5); */
-
 	player p = { 10, 5 };
-	monster r = { 34, 3, 'r', *giant_rat_update };
+	/*monster monsters[]
+
+	 */
+	monster r = { 32, 3, 'r', *giant_rat_update };
+	monster r2 = { 32, 5, 'r', *giant_rat_update };
 	for (int c = 0; c != 'q'; c = getch()) {
-		player_input(floor, &p, c);
 		r.update(floor, &r, p);
+		r2.update(floor, &r2, p);
+		player_input(floor, &p, c);
 
 		draw_floor(floor);
 		monster_draw(&r);
+		monster_draw(&r2);
 		player_draw(&p);
 	}
 
