@@ -34,11 +34,16 @@ int main(void)
 	layout.rooms[0][1] = 1;
 	layout.rooms[0][2] = width - 2;
 	layout.rooms[0][3] = height - 2;
+	layout.generated_hallways = 0;
 
-	split_room(&layout);
-	split_room(&layout);
-	split_room(&layout);
-	split_room(&layout);
+	split_room(&layout, 0);
+	split_room(&layout, 0);
+	split_room(&layout, 1);
+	split_room(&layout, 0);
+	split_room(&layout, 1);
+	split_room(&layout, 2);
+	split_room(&layout, 1);
+
 
 	Floor floor;
 	floor.height = height;
