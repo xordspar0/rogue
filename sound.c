@@ -38,7 +38,7 @@ int sound_init()
 	}
 
 	int file_error;
-	char *file_path = "sound/song.opus";
+	char *file_path = "sound/beat.opus";
 	sound_file = op_open_file(file_path, &file_error);
 	if (file_error != 0) {
 		switch (file_error) {
