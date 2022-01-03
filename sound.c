@@ -3,6 +3,8 @@
 
 #include "sound.h"
 
+static const int num_channels = 2;
+
 static OggOpusFile *sound_file;
 static PaStream *stream;
 
@@ -11,19 +13,21 @@ static int fill_buffer(const void *input, void *output,
 		       const PaStreamCallbackTimeInfo * timeInfo,
 		       PaStreamCallbackFlags statusFlags, void *userData)
 {
-	// Based on my reading of the documentation, the 3rd argument here should be
-	// frameCount, not frameCount * 2. However, the sound is awful when I do that.
-	// It sounds like I'm playing sound from an uninitialized buffer. When I
-	// multiply by 2 it still sounds pretty bad. It sounds like the waveform is
-	// stretched out by 10% or so. But it does sound vaguely like the sound file I
-	// want it to play. We need to figure this out later.
-	int result =
-	    op_read_float_stereo(sound_file, (float *)output, frameCount * 2);
-	if (result < 0) {
-		fprintf(stderr,
-			"Failed to read audio: opusfile error code %d\n",
-			result);
-		return paAbort;
+	int remaining = frameCount;
+	while (remaining > 0) {
+		int result = op_read_float_stereo(sound_file, (float *)output,
+						  remaining);
+		if (result < 0) {
+			fprintf(stderr,
+				"Failed to read audio: opusfile error code %d\n",
+				result);
+			return paAbort;
+		} else if (result == 0) {
+			fprintf(stderr, "End of audio file\n");
+			return paComplete;
+		}
+		remaining -= result * 2;
+		output = (float *)output + remaining;
 	}
 	return paContinue;
 }
@@ -57,10 +61,8 @@ int sound_init()
 
 	err = Pa_OpenDefaultStream(&stream,
 				   0,
-				   2,
-				   paFloat32, 48000,
-				   paFramesPerBufferUnspecified, fill_buffer,
-				   NULL);
+				   num_channels, paFloat32, 48000, 11520,
+				   fill_buffer, NULL);
 
 	if (err != paNoError) {
 		fprintf(stderr, "Failed to open audio stream: %s\n",
