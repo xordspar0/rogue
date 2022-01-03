@@ -7,6 +7,23 @@ typedef struct Room_Layout{
 	int hallways[9][4][2];
 } Room_Layout;
 
+typedef struct Connection{
+	int hallway;
+	int wall;
+	int location;
+	int segment;
+} Connection;
+
+typedef struct Connection_List{
+	Connection connections[9];
+	int count;
+} Connection_List;
+
+typedef struct Connection_Table{
+	Connection_List connections[10];
+	int hallway_count;
+} Connection_Table;
+
 typedef struct Floor{
 	int height;
 	int width;
@@ -22,8 +39,10 @@ typedef enum wall_component{
 	wall_flr,
 } wall_component;
 
+void clear_connections(Connection_Table *);
 int split(int);
-int split_room(Room_Layout *, int);
+int split_room(Room_Layout *, int, Connection_Table *);
+void generate_hallways(Room_Layout *, Connection_Table);
 wall_component get_floor_element(Floor, int, int);
 int floor_walkable(Floor, int, int);
 void set_floor_element(Floor, int, int, wall_component);

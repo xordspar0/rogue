@@ -14,18 +14,30 @@ static char wall_symbol[] = {
 	'?',
 };
 
+void clear_connections(Connection_Table * connection_table)
+{
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 9; j++) {
+			connection_table->connections[i].connections[j] =
+			    (Connection) {
+			-1, -1};
+		}
+		connection_table->connections[i].count = 0;
+	}
+}
+
 int split(int a)
 {
 	return a / 2;
 }
 
-int split_room(Room_Layout * layout, int index)
+int split_room(Room_Layout * layout, int index,
+	       Connection_Table * connection_table)
 {
-	int new_index = layout->generated_rooms;
+	int new_index = layout->generated_rooms++;
 	if (new_index > 10 || index >= new_index) {
 		return 0;
 	}
-	layout->generated_rooms++;
 
 	int r0x0 = layout->rooms[index][0];
 	int r0y0 = layout->rooms[index][1];
@@ -36,23 +48,17 @@ int split_room(Room_Layout * layout, int index)
 	int r1x1 = layout->rooms[index][2];
 	int r1y1 = layout->rooms[index][3];
 
-	int h0x, h0y, h1x, h1y, h2x, h2y, h3x, h3y;
-
-	if (r1x1 - r0x0 < r1y1 - r0y0) {
+	int split_dir = r1x1 - r0x0 < r1y1 - r0y0;
+	int wall_a = split_dir | 2;
+	int wall_b = split_dir;
+	int hallway_location = 0;
+	if (split_dir) {
 		r0x1 = r1x1;
 		r0y1 = split(r0y0 + r1y1);
 		r1x0 = r0x0;
 		r1y0 = r0y1;
 
-		h1x = split(r0x0 + r1x1) - 2;
-		h1y = r0y1;
-		h2x = h1x + 4;
-		h2y = r0y1;
-
-		h0x = h1x;
-		h0y = h1y - 1;
-		h3x = h2x;
-		h3y = h2y + 1;
+		hallway_location = split(r0x0 + r1x1) - 2;
 
 		r0y1--;
 		r1y0++;
@@ -65,15 +71,7 @@ int split_room(Room_Layout * layout, int index)
 		r1x0 = r0x1;
 		r1y0 = r0y0;
 
-		h1x = r0x1;
-		h1y = split(r0y0 + r1y1) - 2;
-		h2x = r0x1;
-		h2y = h1y + 4;
-
-		h0x = h1x - 1;
-		h0y = h1y;
-		h3x = h2x + 1;
-		h3y = h2y;
+		hallway_location = split(r0y0 + r1y1) - 2;
 
 		r0x1--;
 		r1x0++;
@@ -88,19 +86,99 @@ int split_room(Room_Layout * layout, int index)
 	layout->rooms[new_index][2] = r1x1;
 	layout->rooms[new_index][3] = r1y1;
 
-	int new_hallway_index = layout->generated_hallways;
-	layout->generated_hallways++;
+	Connection_List *connections_a = &connection_table->connections[index];
+	Connection_List *connections_b =
+	    &connection_table->connections[new_index];
+	int new_count = 0;
+	int move_wall = split_dir | 2;
+	for (int i = 0; i < connections_a->count; i++) {
+		Connection temporary_connection = connections_a->connections[i];
+		connections_a->connections[i] = (Connection) {
+		-1, -1};
+		if (temporary_connection.wall == move_wall) {
+			connections_b->connections[i] = temporary_connection;
+		} else {
+			connections_a->connections[new_count++] =
+			    temporary_connection;
+		}
+	}
 
-	layout->hallways[new_hallway_index][0][0] = h0x;
-	layout->hallways[new_hallway_index][0][1] = h0y;
-	layout->hallways[new_hallway_index][1][0] = h1x;
-	layout->hallways[new_hallway_index][1][1] = h1y;
-	layout->hallways[new_hallway_index][2][0] = h2x;
-	layout->hallways[new_hallway_index][2][1] = h2y;
-	layout->hallways[new_hallway_index][3][0] = h3x;
-	layout->hallways[new_hallway_index][3][1] = h3y;
+	int new_hallway_index = connection_table->hallway_count++;
+	connections_a->connections[connections_a->count++] = (Connection) {
+	.hallway = new_hallway_index,.wall = wall_a,.location =
+		    hallway_location,.segment = 0};
+	connections_b->connections[connections_b->count++] = (Connection) {
+	.hallway = new_hallway_index,.wall = wall_b,.location =
+		    hallway_location,.segment = 1};
 
 	return 0;
+}
+
+void generate_hallways(Room_Layout * layout, Connection_Table connection_table)
+{
+	layout->generated_hallways++;
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 9; j++) {
+			Connection connection =
+			    connection_table.connections[i].connections[j];
+			if (connection.hallway == 0) {
+				if (connection.segment == 0) {
+					layout->hallways[connection.
+							 hallway][0][0] =
+					    (layout->rooms[i][0] +
+					     layout->rooms[i][2]) / 2;
+					layout->hallways[connection.
+							 hallway][0][1] =
+					    (layout->rooms[i][1] +
+					     layout->rooms[i][3]) / 2;
+					layout->hallways[connection.
+							 hallway][1][0] =
+					    (layout->rooms[i][0] +
+					     layout->rooms[i][2]) / 2;
+					layout->hallways[connection.
+							 hallway][1][1] =
+					    (layout->rooms[i][1] +
+					     layout->rooms[i][3]) / 2;
+					if (connection.wall & 1) {
+						layout->hallways[connection.
+								 hallway][1][1]
+						    = connection.location;
+					} else {
+						layout->hallways[connection.
+								 hallway][1][0]
+						    = connection.location;
+					}
+				} else {
+					layout->hallways[connection.
+							 hallway][2][0] =
+					    (layout->rooms[i][0] +
+					     layout->rooms[i][2]) / 2;
+					layout->hallways[connection.
+							 hallway][2][1] =
+					    (layout->rooms[i][1] +
+					     layout->rooms[i][3]) / 2;
+					layout->hallways[connection.
+							 hallway][3][0] =
+					    (layout->rooms[i][0] +
+					     layout->rooms[i][2]) / 2;
+					layout->hallways[connection.
+							 hallway][3][1] =
+					    (layout->rooms[i][1] +
+					     layout->rooms[i][3]) / 2;
+					if (connection.wall & 1) {
+						layout->hallways[connection.
+								 hallway][2][1]
+						    = connection.location;
+					} else {
+						layout->hallways[connection.
+								 hallway][2][0]
+						    = connection.location;
+					}
+				}
+			}
+		}
+		// connection_table->connections[i].count = 0;
+	}
 }
 
 wall_component get_floor_element(Floor floor, int x, int y)

@@ -35,14 +35,16 @@ int main(void)
 	layout.rooms[0][2] = width - 2;
 	layout.rooms[0][3] = height - 2;
 	layout.generated_hallways = 0;
-
-	split_room(&layout, 0);
-	split_room(&layout, 0);
-	split_room(&layout, 2);
-	split_room(&layout, 0);
-	split_room(&layout, 3);
-	split_room(&layout, 2);
-	split_room(&layout, 2);
+	Connection_Table connections;
+	clear_connections(&connections);
+	split_room(&layout, 0, &connections);
+	split_room(&layout, 0, &connections);
+	split_room(&layout, 2, &connections);
+	split_room(&layout, 0, &connections);
+	split_room(&layout, 3, &connections);
+	split_room(&layout, 2, &connections);
+	split_room(&layout, 2, &connections);
+	generate_hallways(&layout, connections);
 
 	Floor floor;
 	floor.height = height;
