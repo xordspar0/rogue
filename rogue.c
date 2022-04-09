@@ -23,7 +23,7 @@ int main(void)
 	keypad(stdscr, TRUE);
 
 	sound_init();
-	sound_play(0);
+	//sound_play(0);
 
 	int height, width = 0;
 	getmaxyx(stdscr, height, width);
@@ -73,5 +73,6 @@ int main(void)
 		player_draw(&p);
 	}
 
+	sound_quit();
 	endwin();
 }
