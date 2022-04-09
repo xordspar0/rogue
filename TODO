@@ -1,10 +1,16 @@
 randomize room splits
-multiple floors
+multiple(static quantity) floors
 sound
-combat
+simple combat
 more monsters
 monsters can delay their turn if they can't move now
 players and monsters can't occupy the same tile
+
+
+
+
+(dynamic number of floors)
+complex combat
 items
 smithing
 pet

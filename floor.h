@@ -27,6 +27,7 @@ typedef struct Connection_Table{
 typedef struct Floor{
 	int height;
 	int width;
+	char out_of_bounds_character;
 	char * array;
 } Floor;
 

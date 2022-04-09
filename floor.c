@@ -104,12 +104,18 @@ int split_room(Room_Layout * layout, int index,
 	}
 
 	int new_hallway_index = connection_table->hallway_count++;
-	connections_a->connections[connections_a->count++] = (Connection) {
-	.hallway = new_hallway_index,.wall = wall_a,.location =
-		    hallway_location,.segment = 0};
-	connections_b->connections[connections_b->count++] = (Connection) {
-	.hallway = new_hallway_index,.wall = wall_b,.location =
-		    hallway_location,.segment = 1};
+	connections_a->connections[connections_a->count++] = (Connection){
+		.hallway = new_hallway_index,
+		.wall = wall_a,
+		.location = hallway_location,
+		.segment = 0
+	};
+	connections_b->connections[connections_b->count++] = (Connection){
+		.hallway = new_hallway_index,
+		.wall = wall_b,
+		.location = hallway_location,
+		.segment = 1
+	};
 
 	return 0;
 }
@@ -123,56 +129,44 @@ void generate_hallways(Room_Layout * layout, Connection_Table connection_table)
 			    connection_table.connections[i].connections[j];
 			if (connection.hallway == 0) {
 				if (connection.segment == 0) {
-					layout->hallways[connection.
-							 hallway][0][0] =
+					layout->hallways[connection.hallway][0][0] =
 					    (layout->rooms[i][0] +
 					     layout->rooms[i][2]) / 2;
-					layout->hallways[connection.
-							 hallway][0][1] =
+					layout->hallways[connection.hallway][0][1] =
 					    (layout->rooms[i][1] +
 					     layout->rooms[i][3]) / 2;
-					layout->hallways[connection.
-							 hallway][1][0] =
+					layout->hallways[connection.hallway][1][0] =
 					    (layout->rooms[i][0] +
 					     layout->rooms[i][2]) / 2;
-					layout->hallways[connection.
-							 hallway][1][1] =
+					layout->hallways[connection.hallway][1][1] =
 					    (layout->rooms[i][1] +
 					     layout->rooms[i][3]) / 2;
 					if (connection.wall & 1) {
-						layout->hallways[connection.
-								 hallway][1][1]
-						    = connection.location;
+						layout->hallways[connection.hallway][1][1] =
+							connection.location;
 					} else {
-						layout->hallways[connection.
-								 hallway][1][0]
-						    = connection.location;
+						layout->hallways[connection.hallway][1][0] =
+							connection.location;
 					}
 				} else {
-					layout->hallways[connection.
-							 hallway][2][0] =
+					layout->hallways[connection.hallway][2][0] =
 					    (layout->rooms[i][0] +
 					     layout->rooms[i][2]) / 2;
-					layout->hallways[connection.
-							 hallway][2][1] =
+					layout->hallways[connection.hallway][2][1] =
 					    (layout->rooms[i][1] +
 					     layout->rooms[i][3]) / 2;
-					layout->hallways[connection.
-							 hallway][3][0] =
+					layout->hallways[connection.hallway][3][0] =
 					    (layout->rooms[i][0] +
 					     layout->rooms[i][2]) / 2;
-					layout->hallways[connection.
-							 hallway][3][1] =
+					layout->hallways[connection.hallway][3][1] =
 					    (layout->rooms[i][1] +
 					     layout->rooms[i][3]) / 2;
 					if (connection.wall & 1) {
-						layout->hallways[connection.
-								 hallway][2][1]
-						    = connection.location;
+						layout->hallways[connection.hallway][2][1] =
+							connection.location;
 					} else {
-						layout->hallways[connection.
-								 hallway][2][0]
-						    = connection.location;
+						layout->hallways[connection.hallway][2][0] =
+							connection.location;
 					}
 				}
 			}
@@ -181,9 +175,24 @@ void generate_hallways(Room_Layout * layout, Connection_Table connection_table)
 	}
 }
 
+char *get_tile(Floor floor, int x, int y)
+{
+	char oob = 0;
+	oob |= x < 0;
+	oob |= y < 0;
+	oob |= x >= floor.width;
+	oob |= y >= floor.height;
+
+	char *tile = &floor.out_of_bounds_character;
+	if (!oob) {
+		tile = &floor.array[x * floor.height + y];
+	}
+	return tile;
+}
+
 wall_component get_floor_element(Floor floor, int x, int y)
 {
-	return floor.array[x * floor.height + y];
+	return *get_tile(floor, x, y);
 }
 
 int floor_walkable(Floor floor, int x, int y)
@@ -195,7 +204,7 @@ int floor_walkable(Floor floor, int x, int y)
 
 void set_floor_element(Floor floor, int x, int y, wall_component c)
 {
-	floor.array[x * floor.height + y] = c;
+	*get_tile(floor, x, y) = c;
 }
 
 void update_wall(Floor floor, int x, int y, wall_component wall_component)
